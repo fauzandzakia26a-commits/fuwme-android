@@ -22,31 +22,19 @@ jobs:
       with:
         bun-version: latest
 
-    - name: Build Android APK
+    - name: Lacak Lokasi APK
       run: |
-        # Cari lokasi package.json secara otomatis
         TARGET_DIR=$(dirname $(find . -name package.json -not -path "*/node_modules/*" | head -n 1))
-        echo "Project terdeteksi di folder: $TARGET_DIR"
         cd "$TARGET_DIR"
-        
-        # Eksekusi instalasi dan sinkronisasi Capacitor
         bun install
         bun run build --if-present
         bunx cap sync android
-        
-        # Masuk ke folder android untuk merakit APK
         chmod +x android/gradlew
         cd android
         ./gradlew assembleRelease
         
-        # 💡 TRICK SAPU BERSIH: Cari semua file berekstensi .apk hasil kompilasi
-        mkdir -p ../../output-apk
-        find app/build/outputs/apk/ -name "*.apk" -exec cp {} ../../output-apk/FUWME.apk \;
-        echo "Daftar file APK yang berhasil diselamatkan:"
-        ls -la ../../output-apk/
+        # 🕵️‍♂️ PERINTAH DETEKTIF: Cari dan tampilkan semua file .apk ke log layar
+        echo "=== MEMULAI PELACAKAN LOKASI FILE APK ==="
+        find . -name "*.apk"
+        echo "========================================="
 
-    - name: Upload Finished APK Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: FUWME-Android-APK
-        path: output-apk/
