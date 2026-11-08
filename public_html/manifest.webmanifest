@@ -1,0 +1,32 @@
+{
+  "name": "FUWME - Kalender Kegiatan",
+  "short_name": "FUWME",
+  "description": "Kalender kegiatan pribadi yang bisa digunakan secara offline.",
+  "lang": "id",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "background_color": "#1d2028",
+  "theme_color": "#202632",
+  "icons": [
+    {
+      "src": "./assets/images/favicon-64.png",
+      "sizes": "64x64",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/images/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/images/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

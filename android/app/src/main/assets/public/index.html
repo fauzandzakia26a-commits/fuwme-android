@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+  <meta name="theme-color" content="#202632" />
+  <meta name="description" content="Kalender kegiatan pribadi yang bisa digunakan secara offline." />
+  <title>FUWME - Kalender Kegiatan</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/images/favicon.svg" />
+  <link rel="icon" type="image/x-icon" href="./assets/images/favicon.ico?v=9" />
+  <link rel="shortcut icon" href="./assets/images/favicon.ico?v=9" />
+  <link rel="icon" type="image/png" sizes="64x64" href="./assets/images/favicon-64.png?v=9" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./assets/images/favicon-192.png?v=9" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./assets/css/styles.css" />
+</head>
+<body>
+  <div id="sakuraPetals" class="sakura-petals" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span>
+    <span></span><span></span><span></span><span></span><span></span>
+  </div>
+  <aside id="installAppPrompt" class="install-app-prompt" aria-label="Instal aplikasi FUWME" hidden>
+    <div>
+      <strong>Instal FUWME</strong>
+      <p>Tambahkan ke layar utama agar mudah dibuka seperti aplikasi.</p>
+      <p id="installAppStatus" role="status" aria-live="polite"></p>
+    </div>
+    <button id="installAppBtn" type="button">Instal</button>
+  </aside>
+
+  <!-- ============ MASUK ============ -->
+  <div id="signin-screen" class="screen">
+    <div class="card">
+      <div class="brand-row signin-brand-row">
+        <p class="brand">FUWME</p>
+        <button class="cat-hop-button" type="button" aria-label="Lompatkan kucing FUWME">
+          <span class="cat-orbit" aria-hidden="true"></span>
+          <img class="brand-cat" src="./assets/images/fuwme-cat-transparent.png" alt="" />
+        </button>
+      </div>
+      <h1>Selamat datang 👋</h1>
+      <p class="sub">Masuk untuk mulai mengatur jadwal.</p>
+      <form id="signin-form" novalidate>
+        <div class="field">
+          <label for="shortName">Nama panggilan</label>
+          <input id="shortName" type="text" placeholder="mis. alex" autocomplete="username" />
+          <p class="error" id="nameError"></p>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="kamu@contoh.com" autocomplete="email" />
+          <p class="error" id="emailError"></p>
+        </div>
+        <button type="submit" class="block">Masuk</button>
+      </form>
+    </div>
+  </div>
+
+  <section id="subscription-screen" class="screen" aria-labelledby="subscriptionTitle" hidden>
+    <div class="card subscription-screen-card">
+      <p class="eyebrow">Selamat datang di FUWME</p>
+      <h1 id="subscriptionTitle">Pilih paket untuk melanjutkan</h1>
+      <p class="sub">Pilih paket Pro atau Alpha untuk melanjutkan. Kamu bisa mengganti paket nanti melalui Pengaturan.</p>
+      <div class="subscription-options">
+        <article class="subscription-option">
+          <h3>FUWME PRO ✨</h3>
+          <p class="subscription-price">Rp 10.000 <span>/ minggu</span></p>
+          <ul>
+            <li>Akses AI asisten penjadwalan</li>
+            <li>Ekstrak jadwal dari kalimat</li>
+          </ul>
+          <button id="selectProPlan" type="button">Pilih Pro</button>
+        </article>
+        <article class="subscription-option subscription-option-alpha">
+          <span class="subscription-best">TERBAIK</span>
+          <h3>FUWME ALPHA 👑</h3>
+          <p class="subscription-price">Rp 25.000 <span>/ minggu</span></p>
+          <ul>
+            <li>Semua fitur paket Pro</li>
+            <li>Respon AI lebih cepat</li>
+            <li>Analisis tracker otomatis</li>
+          </ul>
+          <button id="selectAlphaPlan" type="button">Pilih Alpha</button>
+        </article>
+      </div>
+      <p class="subscription-disclaimer">Pembayaran belum tersedia; pilihan paket saat ini hanya simulasi yang disimpan di browser ini.</p>
+      <p id="subscriptionSelectionStatus" class="settings-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- ============ APLIKASI ============ -->
+  <div id="app-screen" class="screen">
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-row">
+          <p class="brand">FUWME</p>
+          <button class="cat-hop-button" type="button" aria-label="Lompatkan kucing FUWME">
+            <span class="cat-orbit" aria-hidden="true"></span>
+            <img class="brand-cat" src="./assets/images/fuwme-cat-transparent.png" alt="" />
+          </button>
+        </div>
+        <h1>Hai, <span id="userName"></span></h1>
+        <div class="date-time-row">
+          <p id="dateTimeWidget" class="date-time-widget" aria-label="Tanggal dan waktu saat ini"></p>
+          <button id="currentLocationBtn" class="location-widget" type="button" aria-label="Perbarui lokasi dan cuaca">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+            <span id="currentLocationLabel" role="status" aria-live="polite">Lokasi</span>
+          </button>
+        </div>
+        <p id="nextEventCountdown" class="countdown-widget" role="status" aria-live="polite" hidden></p>
+      </div>
+      <nav class="primary-nav" aria-label="Navigasi utama">
+        <button class="nav-link" type="button" data-view="calendar" aria-current="page">Kalender</button>
+        <button class="nav-link" type="button" data-view="tracker">Tracker</button>
+        <button class="nav-link" type="button" data-view="settings">Pengaturan</button>
+      </nav>
+      <div class="header-right">
+        <span class="eyebrow account-email">Masuk sebagai <strong id="userEmail"></strong></span>
+        <button id="aiChatLauncher" class="ai-chat-launcher" type="button" aria-label="Buka chat Kaisar" title="Chat dengan Kaisar" aria-expanded="false" aria-controls="aiChatPanel">
+          <img src="./assets/images/kaisar-mascot.png" alt="" />
+        </button>
+        <div class="account-menu">
+          <button id="accountMenuBtn" class="account-btn" type="button" aria-label="Menu pengguna" aria-expanded="false" aria-controls="accountMenu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path></svg>
+          </button>
+          <div id="accountMenu" class="account-dropdown" hidden>
+            <button id="signOutBtn" type="button">Keluar</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+    <p id="notificationStatus" class="app-status" role="status" aria-live="polite"></p>
+    <section id="calendar-view" class="app-view">
+    <div class="card calendar-card">
+      <div class="cal-head">
+        <div class="calendar-title-row">
+          <div class="category-menu">
+            <button id="categoryMenuBtn" class="category-menu-btn" type="button" aria-label="Buka kategori" aria-expanded="false" aria-controls="categoryMenu">
+              <span class="hamburger-icon" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span id="activeCategoryName" class="active-category-name">Kategori</span>
+            </button>
+            <div id="categoryMenu" class="category-menu-popover" hidden>
+              <div class="category-menu-heading">
+                <span class="category-label">Kategori</span>
+                <button id="createCalendarBtn" class="add-category-btn" type="button" aria-label="Tambah kategori" title="Tambah kategori">✎</button>
+              </div>
+              <ul id="calendarList" class="calendar-list"></ul>
+              <form id="calendar-form" class="calendar-form" hidden>
+                <div class="field">
+                  <label for="calendarName">Nama kategori</label>
+                  <input id="calendarName" type="text" maxlength="32" placeholder="mis. Pekerjaan" required />
+                </div>
+                <div class="field color-field">
+                  <label for="calendarColor">Warna</label>
+                  <input id="calendarColor" type="color" value="#D98AA6" />
+                </div>
+                <button id="saveCategoryBtn" type="submit">Tambah kategori</button>
+                <button id="cancelCategoryEditBtn" class="ghost" type="button" hidden>Batal</button>
+              </form>
+              <p id="calendarError" class="error" role="status"></p>
+            </div>
+          </div>
+          <h2 id="monthLabel">—</h2>
+          <div class="calendar-tools" aria-label="Alat kalender">
+            <button id="toggleSearchBtn" class="calendar-tool-btn" type="button" aria-label="Buka pencarian kegiatan" aria-expanded="false" aria-controls="calendarSearchPanel" title="Cari kegiatan">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 4.5 4.5"></path></svg>
+            </button>
+            <button id="toggleQuickAddBtn" class="calendar-tool-btn" type="button" aria-label="Buka tambah cepat" aria-expanded="false" aria-controls="quickAddForm" title="Tambah cepat">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+            </button>
+          </div>
+        </div>
+        <div class="cal-nav">
+          <button id="prevMonth" class="nav-btn" type="button" aria-label="Periode sebelumnya">‹</button>
+          <button id="nextMonth" class="nav-btn" type="button" aria-label="Periode berikutnya">›</button>
+          <button id="todayBtn" class="today-btn" type="button">Hari ini</button>
+          <button id="yearViewBtn" class="today-btn" type="button" aria-pressed="false">Tahun</button>
+        </div>
+      </div>
+
+      <div class="calendar-tools-panels">
+        <div id="calendarSearchPanel" class="calendar-search" hidden>
+          <label class="sr-only" for="eventSearch">Cari jadwal berdasarkan nama kegiatan</label>
+          <input id="eventSearch" type="search" placeholder="Cari nama kegiatan..." autocomplete="off" />
+          <p id="eventSearchStatus" class="search-status" role="status" aria-live="polite"></p>
+          <div id="eventSearchResults" class="search-results" role="listbox" aria-label="Hasil pencarian jadwal" hidden></div>
+        </div>
+        <form id="quickAddForm" class="quick-add" hidden>
+          <label class="sr-only" for="quickAddInput">Jelaskan jadwal yang ingin dibuat dengan kalimat biasa</label>
+          <input id="quickAddInput" type="text" placeholder="Ketik kegiatan lalu tekan Enter, mis. Rapat besok jam 3 sore" autocomplete="off" />
+          <button id="quickAddSubmit" type="submit" title="Gunakan AI online untuk membaca jadwal">Buat dengan AI</button>
+          <small class="quick-add-hint">AI memerlukan GROQ_API_KEY yang dikonfigurasi dengan aman di server.</small>
+          <p id="quickAddStatus" class="search-status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+
+      <div id="calWeekdays" class="cal-weekdays">
+        <span>Sen</span><span>Sel</span><span>Rab</span><span>Kam</span>
+        <span>Jum</span><span>Sab</span><span>Min</span>
+      </div>
+
+      <div class="calendar-view-switch" role="group" aria-label="Tampilan jadwal">
+        <button type="button" data-calendar-mode="month" aria-pressed="true">Kalender</button>
+        <button type="button" data-calendar-mode="list" aria-pressed="false">Daftar</button>
+      </div>
+      <div id="cal-grid" class="cal-grid"></div>
+      <div id="scheduleList" class="schedule-list" hidden></div>
+      <div class="calendar-footer" aria-hidden="true">
+        <span>一日一歩 · satu hari, satu langkah</span>
+        <img class="calendar-mascot" src="./assets/images/footer-pixel-mascot.png" alt="" />
+      </div>
+    </div>
+    </section>
+
+    <section id="tracker-view" class="app-view" hidden>
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">Ringkasan dari kalender</p>
+          <h2>Tracker</h2>
+          <p class="tracker-intro-copy">Lihat ritme kegiatan dan waktu yang sudah kamu rencanakan.</p>
+        </div>
+        <span id="trackerCalendarName" class="calendar-badge"></span>
+      </div>
+      <div class="tracker-stats">
+        <article class="card tracker-stat">
+          <div class="tracker-stat-top"><span>Total jadwal</span><svg class="tracker-stat-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"></rect><path d="M8 3v4M16 3v4M4 10h16"></path></svg></div>
+          <strong id="trackerTotal">0</strong><small>bulan ini</small>
+        </article>
+        <article class="card tracker-stat">
+          <div class="tracker-stat-top"><span>Akan datang</span><svg class="tracker-stat-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></div>
+          <strong id="trackerUpcoming">0</strong><small>mulai sekarang</small>
+        </article>
+        <article class="card tracker-stat">
+          <div class="tracker-stat-top"><span>Hari terjadwal</span><svg class="tracker-stat-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="3"></rect><path d="M8 3v4M16 3v4M8 12h2M14 12h2M8 16h2"></path></svg></div>
+          <strong id="trackerDays">0</strong><small>bulan ini</small>
+        </article>
+        <article class="card tracker-stat tracker-stat-duration">
+          <div class="tracker-stat-top"><span>Total durasi</span><svg class="tracker-stat-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l4 2"></path></svg></div>
+          <strong id="trackerDuration">0 mnt</strong><small>bulan ini</small>
+        </article>
+      </div>
+      <p id="weeklyReport" class="weekly-report" role="status" hidden></p>
+      <section class="card tracker-card">
+        <div class="tracker-card-heading">
+          <div><p class="eyebrow">Rencana pekan ini</p><h2>Goals kategori</h2></div>
+        </div>
+        <div id="timeBudgetSummary" class="time-budget-summary"></div>
+      </section>
+      <div class="tracker-content-grid">
+        <section class="card tracker-card tracker-chart-card">
+          <div class="tracker-card-heading">
+            <div>
+              <p class="eyebrow">Pembagian kegiatan</p>
+              <h2>Statistik kategori</h2>
+            </div>
+            <div class="tracker-view-switch" role="group" aria-label="Cara melihat statistik">
+              <button type="button" data-tracker-mode="circle" aria-pressed="true">Lingkaran</button>
+              <button type="button" data-tracker-mode="bars" aria-pressed="false">Durasi</button>
+              <button type="button" data-tracker-mode="table" aria-pressed="false">Tabel</button>
+            </div>
+          </div>
+          <div class="tracker-chart-layout">
+            <div id="trackerChart" class="tracker-chart" role="group" aria-label="Grafik jadwal per kategori"></div>
+            <ul id="trackerLegend" class="tracker-legend"></ul>
+          </div>
+        </section>
+        <section class="card tracker-card tracker-upcoming-card">
+          <div class="tracker-card-heading tracker-upcoming-heading">
+            <div>
+              <p class="eyebrow">Tetap selangkah di depan</p>
+              <h2>Jadwal berikutnya</h2>
+            </div>
+            <span class="tracker-upcoming-mark" aria-hidden="true">✦</span>
+          </div>
+          <ul id="trackerList" class="event-list"></ul>
+          <p id="trackerEmpty" class="empty" hidden>Belum ada jadwal mendatang di kalender ini.</p>
+        </section>
+      </div>
+      <section class="card tracker-card tracker-heatmap-card">
+        <div class="tracker-card-heading">
+          <div>
+            <p class="eyebrow">Konsistensi sepanjang tahun</p>
+            <h2>Habit heatmap</h2>
+            <p class="heatmap-hint">Kotak pertama dimulai dari 1 Januari; warna menunjukkan jadwal yang selesai.</p>
+          </div>
+          <span id="heatmapYear" class="calendar-badge"></span>
+        </div>
+        <div id="habitHeatmap" class="habit-heatmap" aria-label="Jadwal selesai per hari tahun ini"></div>
+      </section>
+    </section>
+
+    <section id="settings-view" class="app-view" hidden>
+      <div class="page-heading"><div><p class="eyebrow">Personalisasi akun</p><h2>Pengaturan</h2></div></div>
+      <div class="card settings-card">
+        <h2>Efek suara</h2>
+        <p class="sub">Efek suara aktif otomatis dan diputar setelah tindakan seperti klik kucing atau menyimpan jadwal.</p>
+        <label class="sound-setting" for="soundEnabled">
+          <input id="soundEnabled" type="checkbox" checked />
+          <span>Efek suara aktif</span>
+        </label>
+        <p id="soundStatus" class="settings-status" role="status"></p>
+      </div>
+      <div class="card settings-card">
+        <h2>Kelopak sakura</h2>
+        <div class="setting-control"><label for="sakuraCount">Jumlah</label><input id="sakuraCount" type="range" min="0" max="20" value="10" /><output id="sakuraCountValue">10</output></div>
+        <div class="setting-control"><label for="sakuraSize">Ukuran</label><input id="sakuraSize" type="range" min="6" max="24" value="14" /><output id="sakuraSizeValue">14 px</output></div>
+        <div class="setting-control"><label for="sakuraSpeed">Kecepatan</label><input id="sakuraSpeed" type="range" min="8" max="40" value="20" /><output id="sakuraSpeedValue">20 dtk</output></div>
+        <p class="sub">Atur animasi untuk menghemat GPU atau baterai. Nilai 0 mematikan kelopak.</p>
+      </div>
+      <div class="card settings-card">
+        <h2>Goals kategori</h2>
+        <p class="sub">Atur target minimum dan maksimum jam per minggu untuk setiap kategori. Kosongkan jika tidak ingin menetapkan target.</p>
+        <div id="timeBudgetSettings" class="budget-settings"></div>
+        <p id="budgetStatus" class="settings-status" role="status"></p>
+      </div>
+      <div class="card settings-card">
+        <h2>Perkiraan cuaca</h2>
+        <p class="sub">Lokasi dan prakiraan 7 hari diperbarui otomatis saat masuk. Izinkan akses lokasi di browser; lokasi hanya digunakan untuk meminta prakiraan.</p>
+        <button id="weatherEnableBtn" type="button">Perbarui lokasi &amp; cuaca</button>
+        <p id="weatherStatus" class="settings-status" role="status"></p>
+      </div>
+      <div class="card settings-card">
+        <h2>Manajemen Akun FUWME</h2>
+        <p class="sub">Pilih paket Pro atau Alpha untuk akun ini.</p>
+        <div class="subscription-status" id="statusCardBorder">
+          <p>Status Paket Saat Ini: <strong id="statusPaketLabel">Belum dipilih</strong></p>
+          <p id="deskripsiPaketAI">Pilih paket Pro atau Alpha untuk mengaktifkan fitur AI.</p>
+        </div>
+        <div class="subscription-options">
+          <article class="subscription-option">
+            <h3>FUWME PRO ✨</h3>
+            <p class="subscription-price">Rp 10.000 <span>/ minggu</span></p>
+            <ul>
+              <li>Akses AI Asisten Penjadwalan</li>
+              <li>Ekstrak kalimat otomatis</li>
+            </ul>
+            <button id="btnUpgradePro" type="button">Pilih Pro</button>
+          </article>
+          <article class="subscription-option subscription-option-alpha">
+            <span class="subscription-best">TERBAIK</span>
+            <h3>FUWME ALPHA 👑</h3>
+            <p class="subscription-price">Rp 25.000 <span>/ minggu</span></p>
+            <ul>
+              <li>Semua fitur paket Pro</li>
+              <li>Respon AI jauh lebih cepat</li>
+              <li>Analisis tracker otomatis</li>
+            </ul>
+            <button id="btnUpgradeAlpha" type="button">Pilih Alpha</button>
+          </article>
+        </div>
+        <p class="subscription-disclaimer">Pilihan paket ini hanya simulasi, belum terhubung ke pembayaran, dan tersimpan di browser ini.</p>
+      </div>
+    </section>
+    </main>
+
+    <section id="aiChatPanel" class="ai-chat-panel" aria-labelledby="aiChatTitle" hidden>
+      <header class="ai-chat-header">
+        <div class="ai-chat-identity">
+          <span class="ai-chat-avatar"><img src="./assets/images/kaisar-mascot.png" alt="" /></span>
+          <div>
+            <p class="ai-chat-kicker">FUWME CIRCLE</p>
+            <h2 id="aiChatTitle">Kaisar</h2>
+            <p>Maskot & teman ngobrolmu</p>
+          </div>
+        </div>
+        <div class="ai-chat-actions">
+          <button id="aiChatClear" class="ai-chat-icon-btn" type="button" aria-label="Mulai percakapan baru" title="Percakapan baru">↻</button>
+          <button id="aiChatClose" class="ai-chat-icon-btn" type="button" aria-label="Tutup chat" title="Tutup">×</button>
+        </div>
+      </header>
+      <div id="aiChatMessages" class="ai-chat-messages" role="log" aria-live="polite" aria-relevant="additions text">
+        <article class="ai-chat-message ai-chat-assistant">
+          <span class="ai-chat-message-avatar"><img src="./assets/images/kaisar-mascot.png" alt="" /></span>
+          <p>Hai! Aku FUWME, teman untuk ngobrol dan membantu merencanakan harimu. Ada yang ingin kamu tanyakan?</p>
+        </article>
+      </div>
+      <form id="aiChatForm" class="ai-chat-form">
+        <label class="sr-only" for="aiChatInput">Pesan untuk FUWME AI</label>
+        <textarea id="aiChatInput" rows="2" maxlength="1200" placeholder="Tulis pesan..." required></textarea>
+        <button id="aiChatSend" type="submit" aria-label="Kirim pesan"><span>Kirim</span><span aria-hidden="true">➤</span></button>
+      </form>
+      <p class="ai-chat-note">Percakapan AI diproses secara aman melalui Groq Cloud.</p>
+    </section>
+  </div>
+
+  <!-- ============ POPUP JADWAL HARIAN ============ -->
+  <div id="day-modal" class="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 id="modalTitle">—</h2>
+        <button type="button" class="close-btn" data-close aria-label="Tutup">✕</button>
+      </div>
+
+      <form id="event-form" class="add-form">
+        <div class="field event-date-field">
+          <label for="eventDate">Tanggal kegiatan</label>
+          <input id="eventDate" type="date" required />
+        </div>
+        <div class="field event-title-field">
+          <label for="title">Nama kegiatan</label>
+          <input id="title" type="text" placeholder="Contoh: Rapat tim" autocomplete="off" required />
+        </div>
+        <div class="field event-title-field">
+          <label for="eventChecklistInput">Checklist (satu item per baris)</label>
+          <textarea id="eventChecklistInput" rows="3" placeholder="Contoh:&#10;Siapkan perlengkapan&#10;Kirim email tindak lanjut"></textarea>
+          <small class="field-hint">Tiap baris menjadi satu langkah checklist. Contoh hanya petunjuk dan tidak disimpan otomatis.</small>
+        </div>
+        <div class="field recurrence-field">
+          <label for="eventStatus">Status kegiatan</label>
+          <select id="eventStatus">
+            <option value="todo">To-Do</option>
+            <option value="progress">In Progress</option>
+            <option value="done">Done</option>
+          </select>
+        </div>
+        <div class="field recurrence-field">
+          <label for="eventRecurrence">Ulangi jadwal</label>
+          <select id="eventRecurrence">
+            <option value="none">Tidak berulang</option>
+            <option value="weekly">Setiap minggu (hari yang sama)</option>
+            <option value="monthly">Setiap bulan (tanggal yang sama)</option>
+          </select>
+          <small id="recurrenceHelp" class="field-hint">Jadwal berulang mengikuti tanggal mulai dan terus berjalan hingga dihapus.</small>
+        </div>
+        <div class="event-times">
+          <fieldset class="clock-field">
+            <legend>Mulai</legend>
+            <div class="analog-clock" data-clock="start" aria-label="Atur jam mulai dengan menggerakkan jarum jam atau mengisi angka">
+              <svg class="clock-face" viewBox="0 0 120 120" role="img" aria-label="Jam analog mulai. Seret jarum atau klik posisi pada jam.">
+                <circle class="clock-dial" cx="60" cy="60" r="54"></circle>
+                <g class="clock-labels" aria-hidden="true"></g>
+                <line class="clock-hand-hit" data-hand="hour" x1="60" y1="60" x2="60" y2="34"></line>
+                <line class="clock-hand-hit" data-hand="minute" x1="60" y1="60" x2="60" y2="20"></line>
+                <line class="clock-hand clock-hour-hand" data-hand="hour" x1="60" y1="60" x2="60" y2="34"></line>
+                <line class="clock-hand clock-minute-hand" data-hand="minute" x1="60" y1="60" x2="60" y2="20"></line>
+                <circle class="clock-center" cx="60" cy="60" r="3"></circle>
+              </svg>
+              <div class="clock-inputs">
+                <label class="sr-only" for="startHour">Jam mulai</label><input id="startHour" type="number" min="0" max="23" value="09" inputmode="numeric" required />
+                <span>:</span>
+                <label class="sr-only" for="startMinute">Menit mulai</label><input id="startMinute" type="number" min="0" max="59" value="00" inputmode="numeric" required />
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="clock-field">
+            <legend>Selesai</legend>
+            <div class="analog-clock" data-clock="end" aria-label="Atur jam selesai dengan menggerakkan jarum jam atau mengisi angka">
+              <svg class="clock-face" viewBox="0 0 120 120" role="img" aria-label="Jam analog selesai. Seret jarum atau klik posisi pada jam.">
+                <circle class="clock-dial" cx="60" cy="60" r="54"></circle>
+                <g class="clock-labels" aria-hidden="true"></g>
+                <line class="clock-hand-hit" data-hand="hour" x1="60" y1="60" x2="60" y2="34"></line>
+                <line class="clock-hand-hit" data-hand="minute" x1="60" y1="60" x2="60" y2="20"></line>
+                <line class="clock-hand clock-hour-hand" data-hand="hour" x1="60" y1="60" x2="60" y2="34"></line>
+                <line class="clock-hand clock-minute-hand" data-hand="minute" x1="60" y1="60" x2="60" y2="20"></line>
+                <circle class="clock-center" cx="60" cy="60" r="3"></circle>
+              </svg>
+              <div class="clock-inputs">
+                <label class="sr-only" for="endHour">Jam selesai</label><input id="endHour" type="number" min="0" max="23" value="10" inputmode="numeric" required />
+                <span>:</span>
+                <label class="sr-only" for="endMinute">Menit selesai</label><input id="endMinute" type="number" min="0" max="59" value="00" inputmode="numeric" required />
+              </div>
+            </div>
+          </fieldset>
+        </div>
+        <p id="eventFormError" class="error" role="status"></p>
+        <button type="submit">Tambah jadwal</button>
+        <button id="cancelEventEditBtn" class="ghost" type="button" hidden>Batal edit</button>
+      </form>
+
+      <ul id="event-list" class="event-list"></ul>
+      <p id="empty" class="empty">Belum ada jadwal untuk hari ini.</p>
+    </div>
+  </div>
+
+  <script src="./assets/js/app.js"></script>
+</body>
+</html>

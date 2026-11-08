@@ -1,0 +1,15 @@
+{
+	"appId": "site.fuwme.app",
+	"appName": "FUWME",
+	"webDir": "dist",
+	"server": {
+		"url": "https://fuwme.site",
+		"cleartext": false,
+		"allowNavigation": [
+			"fuwme.site"
+		]
+	},
+	"android": {
+		"allowMixedContent": false
+	}
+}
