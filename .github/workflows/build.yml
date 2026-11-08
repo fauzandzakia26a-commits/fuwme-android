@@ -24,25 +24,28 @@ jobs:
 
     - name: Install Project Dependencies
       run: bun install
+      working-directory: Fuwme
 
     - name: Build Web Assets
       run: bun run build --if-present
+      working-directory: Fuwme
 
     - name: Sync Capacitor Android
-      run: |
-        bunx cap sync android
+      run: bunx cap sync android
+      working-directory: Fuwme
 
     - name: Set Executable Permission for Gradle
       run: chmod +x android/gradlew
+      working-directory: Fuwme
 
     - name: Build Android Release APK
       run: |
         cd android
         ./gradlew assembleRelease
+      working-directory: Fuwme
 
     - name: Upload Finished APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: FUWME-Android-APK
-        path: android/app/build/outputs/apk/release/app-release-unsigned.apk
-
+        path: Fuwme/android/app/build/outputs/apk/release/app-release-unsigned.apk
