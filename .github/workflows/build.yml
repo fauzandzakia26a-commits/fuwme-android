@@ -22,30 +22,30 @@ jobs:
       with:
         bun-version: latest
 
-    - name: Install Project Dependencies
-      run: bun install
-      working-directory: Fuwme
-
-    - name: Build Web Assets
-      run: bun run build --if-present
-      working-directory: Fuwme
-
-    - name: Sync Capacitor Android
-      run: bunx cap sync android
-      working-directory: Fuwme
-
-    - name: Set Executable Permission for Gradle
-      run: chmod +x android/gradlew
-      working-directory: Fuwme
-
-    - name: Build Android Release APK
+    - name: Build Android APK
       run: |
+        # Cari lokasi package.json secara otomatis
+        TARGET_DIR=$(dirname $(find . -name package.json -not -path "*/node_modules/*" | head -n 1))
+        echo "Project terdeteksi di folder: $TARGET_DIR"
+        cd "$TARGET_DIR"
+        
+        # Eksekusi instalasi dan sinkronisasi Capacitor
+        bun install
+        bun run build --if-present
+        bunx cap sync android
+        
+        # Masuk ke folder android untuk merakit APK
+        chmod +x android/gradlew
         cd android
         ./gradlew assembleRelease
-      working-directory: Fuwme
+        
+        # Ambil file APK hasil rakitan
+        mkdir -p ../../output-apk
+        cp app/build/outputs/apk/release/app-release-unsigned.apk ../../output-apk/FUWME.apk
 
     - name: Upload Finished APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: FUWME-Android-APK
-        path: Fuwme/android/app/build/outputs/apk/release/app-release-unsigned.apk
+        path: output-apk/FUWME.apk
+
