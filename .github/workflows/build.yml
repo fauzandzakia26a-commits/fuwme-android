@@ -11,10 +11,10 @@ jobs:
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21' # Menaikkan versi sesuai kebutuhan gradle project Anda
         distribution: 'zulu'
 
     - name: Install Bun Package Manager
@@ -48,4 +48,3 @@ jobs:
       with:
         name: FUWME-Android-APK
         path: output-apk/FUWME.apk
-
