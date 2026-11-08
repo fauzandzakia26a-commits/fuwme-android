@@ -32,15 +32,11 @@ jobs:
         chmod +x android/gradlew
         cd android
         ./gradlew assembleRelease
-        
-        # Mengunci koordinat sesuai hasil pelacakan log Anda
-        mkdir -p ../../output-apk
-        cp app/build/outputs/apk/release/app-release-unsigned.apk ../../output-apk/FUWME.apk
 
     - name: Upload Finished APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: FUWME-Android-APK
-        path: output-apk/FUWME.apk
-
-
+        # Menggunakan pencarian bintang ganda (glob pattern) untuk langsung mengambil file di manapun ia berada
+        path: "**/app/build/outputs/apk/release/app-release-unsigned.apk"
+        if-no-files-found: error
